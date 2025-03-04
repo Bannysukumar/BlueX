@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/light_red">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Adjust User Rates"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        android:animation="@anim/fade_in"
+        style="@style/TextStyleHeader" />
+
+    <EditText
+        android:id="@+id/miningRateInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Mining Rate"
+        android:inputType="numberDecimal"
+        android:padding="12dp"
+        android:animation="@anim/fade_in" />
+
+    <EditText
+        android:id="@+id/referralBonusInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Referral Bonus Rate"
+        android:inputType="numberDecimal"
+        android:layout_marginTop="8dp"
+        android:padding="12dp"
+        android:animation="@anim/fade_in" />
+
+    <EditText
+        android:id="@+id/balanceAdjustmentInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Balance Adjustment"
+        android:inputType="numberDecimal"
+        android:layout_marginTop="8dp"
+        android:padding="12dp"
+        android:animation="@anim/fade_in" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="12sp"
+        android:textColor="@color/gray"
+        android:text="Note: Use negative values to decrease balance"
+        android:animation="@anim/fade_in" />
+
+</LinearLayout> 

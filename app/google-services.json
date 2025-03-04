@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "85480769671",
+    "firebase_url": "https://bluex-8fc8b-default-rtdb.firebaseio.com",
+    "project_id": "bluex-8fc8b",
+    "storage_bucket": "bluex-8fc8b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:85480769671:android:56659c1f9d8cdbf8175022",
+        "android_client_info": {
+          "package_name": "com.bluex.mining"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "85480769671-hm52it7s1raidkavtshrsdafhpvqghsp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bluex.mining",
+            "certificate_hash": "8c7435892ff8ff68557950e08e490abb411e70db"
+          }
+        },
+        {
+          "client_id": "85480769671-fne75bi3r1h3ln4isv1vua4ho9soistk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANIbJdSlwAwhAF6PBAl89G9vx_tsXsZso"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "85480769671-fne75bi3r1h3ln4isv1vua4ho9soistk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
