@@ -32,8 +32,10 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Withdrawal withdrawal = transactions.get(position);
-        holder.amountText.setText(String.format("%.5f BXC", withdrawal.getAmount()));
-        holder.typeText.setText(withdrawal.getType());
+        holder.userIdText.setText("User ID: " + withdrawal.getUserId());
+        holder.amountText.setText("Amount: " + withdrawal.getAmount());
+        holder.statusText.setText("Status: " + withdrawal.getStatus());
+        holder.mobileText.setText("Mobile: " + withdrawal.getMobileNumber());
         holder.dateText.setText(dateFormat.format(new Date(withdrawal.getTimestamp())));
     }
 
@@ -49,13 +51,17 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView amountText;
-        TextView typeText;
+        TextView userIdText;
+        TextView statusText;
+        TextView mobileText;
         TextView dateText;
 
         ViewHolder(View itemView) {
             super(itemView);
             amountText = itemView.findViewById(R.id.amountText);
-            typeText = itemView.findViewById(R.id.typeText);
+            userIdText = itemView.findViewById(R.id.userIdText);
+            statusText = itemView.findViewById(R.id.statusText);
+            mobileText = itemView.findViewById(R.id.mobileText);
             dateText = itemView.findViewById(R.id.dateText);
         }
     }

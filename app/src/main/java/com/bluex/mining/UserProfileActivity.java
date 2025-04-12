@@ -2,12 +2,14 @@ package com.bluex.mining;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.bluex.mining.models.User;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -15,16 +17,28 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class UserProfileActivity extends AppCompatActivity {
+public class UserProfileActivity extends BaseActivity {
     private DatabaseReference mDatabase;
     private User currentUser;
-    private TextView displayNameText, emailText, balanceText, miningRateText;
-    private TextView totalMinedText, referralCodeText, referralCountText, referralBonusText;
+    private TextView displayNameText;
+    private TextView referralCountText;
+    private TextView referralBonusText;
+    private TextView phoneNumberInput;
+    private ImageView profileImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
+
+        // Setup toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Profile");
+            }
+        }
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -36,13 +50,10 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private void initializeViews() {
         displayNameText = findViewById(R.id.displayNameText);
-        emailText = findViewById(R.id.emailText);
-        balanceText = findViewById(R.id.balanceText);
-        miningRateText = findViewById(R.id.miningRateText);
-        totalMinedText = findViewById(R.id.totalMinedText);
-        referralCodeText = findViewById(R.id.referralCodeText);
         referralCountText = findViewById(R.id.referralCountText);
         referralBonusText = findViewById(R.id.referralBonusText);
+        phoneNumberInput = findViewById(R.id.phoneNumberInput);
+        profileImage = findViewById(R.id.profileImage);
     }
 
     private void loadUserData(String userId) {
@@ -58,20 +69,22 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        displayNameText.setText(currentUser.getDisplayName());
-        emailText.setText(currentUser.getEmail());
-        balanceText.setText("Balance: " + currentUser.getBalance());
-        miningRateText.setText("Mining Rate: " + currentUser.getMiningRate() + "/sec");
-        totalMinedText.setText("Total Mined: " + currentUser.getTotalMined());
-        referralCodeText.setText("Your Referral Code: " + currentUser.getReferralCode());
-        referralCountText.setText("Referrals: " + currentUser.getReferralCount());
-        referralBonusText.setText("Referral Bonus: " + currentUser.getReferralBonus());
+        if (currentUser != null) {
+            displayNameText.setText(currentUser.getDisplayName());
+            referralCountText.setText("Referrals: " + currentUser.getReferralCount());
+            referralBonusText.setText("Referral Bonus: " + currentUser.getReferralBonus());
+            
+            // Set phone number if it exists
+            if (currentUser.getPhoneNumber() != null && !currentUser.getPhoneNumber().isEmpty()) {
+                phoneNumberInput.setText(currentUser.getPhoneNumber());
+            }
+        }
     }
 
     private void setupButtons() {
         findViewById(R.id.editProfileButton).setOnClickListener(v -> showEditProfileDialog());
         findViewById(R.id.shareReferralButton).setOnClickListener(v -> shareReferralCode());
-        findViewById(R.id.withdrawButton).setOnClickListener(v -> showWithdrawDialog());
+        findViewById(R.id.updateProfileButton).setOnClickListener(v -> updateProfile());
     }
 
     private void showEditProfileDialog() {
@@ -86,8 +99,23 @@ public class UserProfileActivity extends AppCompatActivity {
         startActivity(Intent.createChooser(shareIntent, "Share Referral Code"));
     }
 
-    private void showWithdrawDialog() {
-        // Show withdrawal dialog
-        // This should be implemented based on your withdrawal process
+    private void updateProfile() {
+        String phoneNumber = phoneNumberInput.getText().toString().trim();
+
+        if (TextUtils.isEmpty(phoneNumber)) {
+            Toast.makeText(this, "Mobile number is required to proceed with withdrawals or transfers.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Update user profile with the new phone number
+        currentUser.setPhoneNumber(phoneNumber);
+        mDatabase.child("users").child(currentUser.getUid()).setValue(currentUser)
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(this, "Profile updated successfully!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Failed to update profile: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
     }
 } 

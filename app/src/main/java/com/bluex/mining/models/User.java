@@ -101,6 +101,7 @@ public class User {
         this.streak = 0;
         this.referrals = new ArrayList<>();
         this.referralEarnings = new HashMap<>();
+        this.phoneNumber = "";
     }
 
     public User(String uid) {
@@ -395,4 +396,10 @@ public class User {
     // Compatibility methods for existing code using userId
     public String getUserId() { return uid; }
     public void setUserId(String userId) { this.uid = userId; }
+
+    public long getTotalMiningTime() {
+        if (miningStartTime == 0) return 0;
+        long endTime = miningEndTime > 0 ? miningEndTime : System.currentTimeMillis();
+        return (endTime - miningStartTime) / 1000; // Convert to seconds
+    }
 } 

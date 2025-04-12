@@ -19,7 +19,7 @@ import com.google.firebase.database.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TasksActivity extends AppCompatActivity implements TaskAdapter.TaskClickListener {
+public class TasksActivity extends BaseActivity implements TaskAdapter.TaskClickListener {
     
     private RecyclerView recyclerView;
     private TaskAdapter adapter;
@@ -35,11 +35,13 @@ public class TasksActivity extends AppCompatActivity implements TaskAdapter.Task
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
 
-        // Set up toolbar
+        // Setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Tasks");
+            }
         }
 
         // Set up RecyclerView

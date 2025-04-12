@@ -4,15 +4,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/animated_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_animated_gradient"
+        android:alpha="0.8"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/ic_back"
-        app:title="About Us"
-        app:titleTextColor="@color/white" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/attractive_blue"
+        app:titleTextColor="@color/white"
+        app:navigationIcon="@null"
+        android:elevation="4dp"
+        app:title="About"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -38,6 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="About bxc"
+                android:textColor="@color/text_primary"
                 android:textSize="24sp"
                 android:textStyle="bold" />
 
@@ -46,6 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="bxc is a revolutionary mining platform that allows users to earn cryptocurrency through various activities and tasks."
+                android:textColor="@color/text_primary"
                 android:textSize="16sp" />
 
             <TextView
@@ -53,6 +68,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:text="Contact Us"
+                android:textColor="@color/text_primary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -62,6 +78,7 @@
                 android:layout_marginTop="8dp"
                 android:autoLink="email"
                 android:text="Email: support@bxc.io"
+                android:textColor="@color/text_primary"
                 android:textSize="16sp" />
 
         </LinearLayout>

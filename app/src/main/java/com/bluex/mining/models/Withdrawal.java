@@ -4,25 +4,22 @@ public class Withdrawal {
     private String id;
     private String userId;
     private double amount;
-    private String type;
-    private long timestamp;
     private String status;
-    private String rejectionReason;
+    private long timestamp;
+    private String walletAddress;
+    private String mobileNumber;
 
     public Withdrawal() {
-        // Required for Firebase
+        // Default constructor required for Firebase
     }
 
-    public Withdrawal(String userId, double amount, String type) {
+    public Withdrawal(String userId, double amount, String status, long timestamp, String walletAddress, String mobileNumber) {
         this.userId = userId;
         this.amount = amount;
-        this.type = type;
-        this.timestamp = System.currentTimeMillis();
-        this.status = "pending";
-    }
-
-    public Withdrawal(String userId, double amount) {
-        this(userId, amount, "Withdrawal"); // Default type for withdrawals
+        this.status = status;
+        this.timestamp = timestamp;
+        this.walletAddress = walletAddress;
+        this.mobileNumber = mobileNumber;
     }
 
     // Getters and setters
@@ -35,15 +32,15 @@ public class Withdrawal {
     public double getAmount() { return amount; }
     public void setAmount(double amount) { this.amount = amount; }
 
-    public String getType() { return type != null ? type : "Basic Mining"; }
-    public void setType(String type) { this.type = type; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getWalletAddress() { return walletAddress; }
+    public void setWalletAddress(String walletAddress) { this.walletAddress = walletAddress; }
 
-    public String getRejectionReason() { return rejectionReason; }
-    public void setRejectionReason(String reason) { this.rejectionReason = reason; }
-} 
+    public String getMobileNumber() { return mobileNumber; }
+    public void setMobileNumber(String mobileNumber) { this.mobileNumber = mobileNumber; }
+}

@@ -39,7 +39,9 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Email">
+                android:hint="Email"
+                app:boxBackgroundColor="@color/white"
+                app:boxStrokeColor="@color/blue">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/emailInput"
@@ -55,7 +57,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="Password"
-                app:passwordToggleEnabled="true">
+                app:passwordToggleEnabled="true"
+                app:boxBackgroundColor="@color/white"
+                app:boxStrokeColor="@color/blue">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/passwordInput"

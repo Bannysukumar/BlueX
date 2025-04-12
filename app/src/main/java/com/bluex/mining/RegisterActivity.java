@@ -19,6 +19,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,11 +81,11 @@ public class RegisterActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(referralCode)) {
             validateReferralCode(referralCode, () -> {
                 // Referral code is valid, proceed with registration
-                registerUser(email, password, firstName, referralCode);
+                registerUser(email, password, referralCode);
             });
         } else {
             // No referral code, proceed directly
-            registerUser(email, password, firstName, null);
+            registerUser(email, password, null);
         }
     }
 
@@ -133,29 +134,62 @@ public class RegisterActivity extends AppCompatActivity {
             });
     }
 
-    private void registerUser(String email, String password, String username, String referralCode) {
+    private void registerUser(String email, String password, String referralCode) {
         mAuth.createUserWithEmailAndPassword(email, password)
-            .addOnSuccessListener(authResult -> {
-                String userId = authResult.getUser().getUid();
-                
-                // Generate unique referral code for new user
-                String newUserReferralCode = generateReferralCode(username);
-                
-                // Create user object
-                User newUser = new User();
-                newUser.setEmail(email);
-                newUser.setUsername(username);
-                newUser.setReferralCode(newUserReferralCode);
-                
-                // If referral code was provided, process it
-                if (!TextUtils.isEmpty(referralCode)) {
-                    processReferral(userId, newUser, referralCode);
+            .addOnCompleteListener(this, task -> {
+                if (task.isSuccessful()) {
+                    // Registration successful
+                    FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                    String userId = firebaseUser.getUid();
+
+                    // Create a new user object
+                    User newUser = new User();
+                    newUser.setUid(userId);
+                    newUser.setEmail(email);
+                    newUser.setBalance(0.0); // Initial balance
+                    newUser.setReferralCode(referralCode); // Set the referral code
+
+                    // Save user to the database
+                    mDatabase.child("users").child(userId).setValue(newUser)
+                        .addOnCompleteListener(saveTask -> {
+                            if (saveTask.isSuccessful()) {
+                                // Check if referral code is provided
+                                if (referralCode != null && !referralCode.isEmpty()) {
+                                    // Update the referrer's balance
+                                    mDatabase.child("users").orderByChild("referralCode").equalTo(referralCode).get().addOnCompleteListener(referralTask -> {
+                                        if (referralTask.isSuccessful() && referralTask.getResult().exists()) {
+                                            String referrerId = referralTask.getResult().getChildren().iterator().next().getKey();
+                                            mDatabase.child("users").child(referrerId).child("balance").get().addOnCompleteListener(referrerBalanceTask -> {
+                                                if (referrerBalanceTask.isSuccessful()) {
+                                                    double referrerBalance = referrerBalanceTask.getResult().getValue(Double.class);
+                                                    mDatabase.child("users").child(referrerId).child("balance").setValue(referrerBalance + 8.0); // Add 8 BXC to referrer
+                                                    
+                                                    // Increment the referral count
+                                                    mDatabase.child("users").child(referrerId).child("referralCount").get().addOnCompleteListener(countTask -> {
+                                                        if (countTask.isSuccessful()) {
+                                                            int currentCount = countTask.getResult().getValue(Integer.class);
+                                                            mDatabase.child("users").child(referrerId).child("referralCount").setValue(currentCount + 1);
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                                // Proceed to the next activity
+                                showSuccess("Registration successful!");
+                                startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                                finish();
+                            } else {
+                                // Handle error
+                                showError("Failed to save user data: " + task.getException().getMessage());
+                            }
+                        });
                 } else {
-                    // Save user without referral
-                    saveNewUser(userId, newUser);
+                    // Handle registration failure
+                    showError("Registration failed: " + task.getException().getMessage());
                 }
-            })
-            .addOnFailureListener(e -> showError("Registration failed: " + e.getMessage()));
+            });
     }
 
     private String generateReferralCode(String username) {

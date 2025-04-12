@@ -3,6 +3,7 @@ package com.bluex.mining;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -29,7 +30,7 @@ public class TransactionHistoryActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private WithdrawalAdapter adapter;
     private ProgressBar progressBar;
-    private TextView emptyView;
+    private LinearLayout emptyView;
     private DatabaseReference mDatabase;
     private ValueEventListener withdrawalsListener;
 

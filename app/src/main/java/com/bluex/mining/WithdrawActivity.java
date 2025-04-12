@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,9 +19,11 @@ import androidx.cardview.widget.CardView;
 import com.bluex.mining.models.User;
 import com.bluex.mining.models.Withdrawal;
 import com.bluex.mining.models.AdminMessage;
+import com.bluex.mining.models.WithdrawalRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,7 +37,7 @@ import android.util.Log;
 
 public class WithdrawActivity extends AppCompatActivity {
     private static final String TAG = "WithdrawActivity";
-    private static final double MIN_WITHDRAWAL = 400.0;
+    private static final double MIN_WITHDRAWAL = 20.0;
     private static final double MAX_WITHDRAWAL = 10000.0;
     
     private TextView balanceText;
@@ -77,8 +80,17 @@ public class WithdrawActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Withdraw BXC");
         }
 
-        // Load user data
-        loadUserData();
+        // Retrieve current user data
+        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        if (firebaseUser != null) {
+            String userId = firebaseUser.getUid();
+            mDatabase.child("users").child(userId).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    currentUser = task.getResult().getValue(User.class);
+                    updateUI();
+                }
+            });
+        }
 
         // Load admin messages
         loadAdminMessages();
@@ -98,31 +110,7 @@ public class WithdrawActivity extends AppCompatActivity {
         });
 
         // Set up withdraw button
-        withdrawButton.setOnClickListener(v -> {
-            if (validateAmount()) {
-                double amount = Double.parseDouble(amountInput.getText().toString());
-                showConfirmationDialog(amount);
-            }
-        });
-    }
-
-    private void loadUserData() {
-        if (mAuth.getCurrentUser() == null) return;
-
-        String userId = mAuth.getCurrentUser().getUid();
-        mDatabase.child("users").child(userId)
-            .addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    currentUser = snapshot.getValue(User.class);
-                    updateUI();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    showError("Failed to load user data");
-                }
-            });
+        withdrawButton.setOnClickListener(v -> processWithdrawal());
     }
 
     private void loadAdminMessages() {
@@ -202,54 +190,62 @@ public class WithdrawActivity extends AppCompatActivity {
         }
     }
 
-    private void showConfirmationDialog(double amount) {
-        new MaterialAlertDialogBuilder(this)
-            .setTitle("Confirm Withdrawal")
-            .setMessage(String.format("Are you sure you want to withdraw %.5f BXC?", amount))
-            .setPositiveButton("Confirm", (dialog, which) -> processWithdrawal(amount))
-            .setNegativeButton("Cancel", null)
-            .show();
-    }
+    private void processWithdrawal() {
+        if (currentUser == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-    private void processWithdrawal(double amount) {
-        if (currentUser == null || !validateAmount()) return;
+        String amountStr = amountInput.getText().toString().trim();
+        if (TextUtils.isEmpty(amountStr)) {
+            Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        showLoading(true);
-        statusText.setText("Processing withdrawal...");
+        double amount = Double.parseDouble(amountStr);
+        if (amount < MIN_WITHDRAWAL || amount > MAX_WITHDRAWAL) {
+            Toast.makeText(this, "Amount must be between " + MIN_WITHDRAWAL + " and " + MAX_WITHDRAWAL, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check if mobile number is set
+        if (TextUtils.isEmpty(currentUser.getPhoneNumber())) {
+            Toast.makeText(this, "Mobile number is required to withdraw funds.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        double adminCharge = amount * 0.10; // Calculate 10% admin charge
+        double totalAmount = amount + adminCharge; // Total amount to deduct from user's balance
 
         String userId = mAuth.getCurrentUser().getUid();
-        String withdrawalId = mDatabase.child("withdrawals").push().getKey();
 
-        Map<String, Object> withdrawalData = new HashMap<>();
-        withdrawalData.put("userId", userId);
-        withdrawalData.put("amount", amount);
-        withdrawalData.put("status", "pending");
-        withdrawalData.put("timestamp", System.currentTimeMillis());
-        withdrawalData.put("walletAddress", currentUser.getWalletAddress());
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("/withdrawals/" + withdrawalId, withdrawalData);
-        updates.put("/users/" + userId + "/balance", currentUser.getBalance() - amount);
-        updates.put("/users/" + userId + "/pendingWithdrawals", currentUser.getPendingWithdrawals() + 1);
-
-        mDatabase.updateChildren(updates)
-            .addOnSuccessListener(aVoid -> {
-                showLoading(false);
-                statusText.setText("Withdrawal request submitted successfully!");
-                statusText.setTextColor(getResources().getColor(R.color.green));
-                new Handler().postDelayed(() -> finish(), 2000);
-            })
-            .addOnFailureListener(e -> {
-                showLoading(false);
-                statusText.setText("Withdrawal failed: " + e.getMessage());
-                statusText.setTextColor(getResources().getColor(R.color.red));
-            });
+        // Check sender's balance
+        mDatabase.child("users").child(userId).child("balance").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                double currentBalance = task.getResult().getValue(Double.class);
+                if (currentBalance >= totalAmount) {
+                    // Proceed with the withdrawal
+                    withdrawFunds(userId, amount);
+                } else {
+                    Toast.makeText(this, "Insufficient balance after admin charges", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
-    private void showLoading(boolean show) {
-        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        amountInput.setEnabled(!show);
-        withdrawButton.setEnabled(!show);
+    private void withdrawFunds(String userId, double amount) {
+        String mobileNumber = currentUser.getPhoneNumber();
+        String requestId = mDatabase.child("withdrawalRequests").push().getKey(); // Generate a unique ID for the request
+
+        WithdrawalRequest request = new WithdrawalRequest(userId, amount, mobileNumber, "Pending");
+
+        mDatabase.child("withdrawalRequests").child(requestId).setValue(request)
+            .addOnSuccessListener(aVoid -> {
+                Toast.makeText(this, "Withdrawal request submitted successfully!", Toast.LENGTH_SHORT).show();
+            })
+            .addOnFailureListener(e -> {
+                Toast.makeText(this, "Failed to submit request: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
     }
 
     private void updateUI() {
@@ -265,10 +261,6 @@ public class WithdrawActivity extends AppCompatActivity {
                 statusText.setTextColor(getResources().getColor(R.color.gray));
             }
         }
-    }
-
-    private void showError(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     @Override

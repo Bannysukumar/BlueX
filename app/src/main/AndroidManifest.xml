@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:name=".BlueXApp"
@@ -31,12 +32,7 @@
         
         <activity
             android:name=".LoginActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="true" />
         
         <activity
             android:name=".MainActivity"
@@ -146,9 +142,23 @@
             android:name=".MessagesActivity"
             android:exported="false" />
             
+        <activity
+            android:name=".TransferActivity"
+            android:exported="false" />
+            
+        <activity android:name=".PrivacyPolicyActivity" />
+            
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-4029860754779720~9889581852"/>
+            android:value="ca-app-pub-3940256099942544~3347511713" />
+
+        <meta-data
+            android:name="com.amazon.sdk.REGIONAL_RESTRICTIONS"
+            android:value="US,GB,DE" />
+            
+        <meta-data
+            android:name="com.amazon.sdk.PRIVACY_POLICY_URL"
+            android:value="https://sites.google.com/view/bluex1232/home" />
 
         <!-- Unity Ads Activity -->
         <activity
@@ -161,7 +171,8 @@
         <service
             android:name=".services.MiningService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
 
         <!-- Admin Activities -->
         <activity
@@ -181,6 +192,8 @@
             android:exported="false"
             android:label="Global Settings"
             android:parentActivityName=".AdminMainActivity"/>
+
+        <activity android:name=".AdminManagementActivity" />
 
     </application>
 

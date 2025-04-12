@@ -43,6 +43,13 @@
             android:layout_height="wrap_content"
             android:text="2025-02-22"
             android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/mobileText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mobile"
+            android:textSize="16sp" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView> 

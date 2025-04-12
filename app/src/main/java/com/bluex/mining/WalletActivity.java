@@ -3,6 +3,7 @@ package com.bluex.mining;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -21,6 +22,7 @@ public class WalletActivity extends AppCompatActivity {
     private TextView balanceText;
     private Button withdrawButton;
     private Button historyButton;
+    private TextView minWithdrawText;
     private DatabaseReference mDatabase;
     private ValueEventListener userListener;
 
@@ -43,6 +45,7 @@ public class WalletActivity extends AppCompatActivity {
         balanceText = findViewById(R.id.balanceText);
         withdrawButton = findViewById(R.id.withdrawButton);
         historyButton = findViewById(R.id.historyButton);
+        minWithdrawText = findViewById(R.id.minWithdrawText);
 
         // Setup click listeners
         withdrawButton.setOnClickListener(v -> {
@@ -78,7 +81,9 @@ public class WalletActivity extends AppCompatActivity {
 
     private void updateUI(User user) {
         balanceText.setText(String.format("BXC %.5f", user.getBalance()));
-        withdrawButton.setEnabled(user.getBalance() >= 400.0); // Minimum withdrawal amount
+        boolean hasMinBalance = user.getBalance() >= 400.0;
+        withdrawButton.setEnabled(hasMinBalance);
+        minWithdrawText.setVisibility(hasMinBalance ? View.GONE : View.VISIBLE);
     }
 
     @Override
